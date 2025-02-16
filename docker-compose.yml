@@ -1,0 +1,47 @@
+
+version: '3.1'
+
+services:
+
+  wordpress:
+    image: wordpress
+    container_name: wordpress
+    restart: always
+    ports:
+      - 8989:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: Test123
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - /srv/appdata/wordpress:/var/www/html
+
+  redis:
+    image: redis:latest
+    hostname: redis
+    container_name: redis
+    restart: always
+    expose:
+      - 6379
+    command:
+      - redis-server
+      - --save 60 1
+      - --loglevel warning
+      - --maxmemory 128mb
+      - --maxmemory-policy allkeys-lru
+    volumes:
+      - /srv/appdata/wordpress/redis:/var/lib/redis
+      - /srv/appdata/wordpress/redis/data:/data
+      
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: Test123
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - /srv/appdata/wordpress/db:/var/lib/mysql
